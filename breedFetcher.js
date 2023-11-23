@@ -1,17 +1,33 @@
 const request = require('request');
-const breedUserInput = process.argv.splice(2);
 
 
-request(`https://api.thecatapi.com/v1/breeds/search?q=${encodeURIComponent(breedUserInput)}`, (error, respone, body) => {
+const fetchBreedDescription = function(breedName, callback) {
+  
+  const url = `https://api.thecatapi.com/v1/breeds/search?q=${encodeURIComponent(breedName)}`;
 
-  if (error) {
-    return console.log(`Error ${error.errno}. Deitals: ${error.code} ${error.syscall}.`);
-  }
+  request(url, (error, response, body) => {
+  
+    if (error) {
+      callback(`Error ${error.errno}. Deitals: ${error.code} ${error.syscall}.`, null);
+      return;
+    }
 
-  try {
     const data = JSON.parse(body);
-    console.log(data[0].description);
-  } catch (error) {
-    console.log(`Sorry! ${breedUserInput} is not available.`);
-  }
-});
+    const breedDesc = data[0];
+
+    if (breedDesc) {
+      
+      callback(null, breedDesc.description);
+      return;
+      
+    }
+    callback(`Sorry! ${breedName} is not available.`, null);
+    return;
+      
+
+ 
+  });
+};
+
+
+module.exports = { fetchBreedDescription };
